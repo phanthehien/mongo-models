@@ -11,25 +11,23 @@ class MongoModels {
         Object.assign(this, attrs);
     }
 
+    static connect(uri, options) {
 
-    static connect(uri, options, callback) {
+        return new Promise(function (resolve, reject) {
 
-        Mongodb.MongoClient.connect(uri, options, (err, db) => {
+            Mongodb.MongoClient.connect(uri, options, (err, db) => {
 
-            if (err) {
-                return callback(err);
-            }
-
-            MongoModels.db = db;
-
-            callback(null, db);
+                if (err) {
+                    return reject(err);
+                }
+                MongoModels.db = db;
+                return resolve(db);
+            });
         });
     }
 
-
     static disconnect() {
-
-        MongoModels.db.close();
+        return MongoModels.db.close();
     }
 
 
@@ -41,19 +39,17 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        collection.createIndexes.apply(collection, args);
+        return collection.createIndexes.apply(collection, args);
     }
 
+    static validate(input) {
 
-    static validate(input, callback) {
-
-        return Joi.validate(input, this.schema, callback);
+        return Joi.validate(input, this.schema);
     }
 
+    validate() {
 
-    validate(callback) {
-
-        return Joi.validate(this, this.constructor.schema, callback);
+        return Joi.validate(this, this.constructor.schema);
     }
 
 
@@ -110,72 +106,65 @@ class MongoModels {
         next.apply(undefined, args);
     }
 
-
-    static pagedFind(filter, fields, sort, limit, page, callback) {
+    static pagedFindAsync(filter, fields, sort, limit, page) {
 
         const self = this;
-        const output = {
-            data: undefined,
-            pages: {
-                current: page,
-                prev: 0,
-                hasPrev: false,
-                next: 0,
-                hasNext: false,
-                total: 0
-            },
-            items: {
-                limit,
-                begin: ((page * limit) - limit) + 1,
-                end: page * limit,
-                total: 0
-            }
-        };
-
-        fields = this.fieldsAdapter(fields);
-        sort = this.sortAdapter(sort);
-
-        Async.auto({
-            count: function (done) {
-
-                self.count(filter, done);
-            },
-            find: function (done) {
-
-                const options = {
+        return new Promise(function (resolve, reject) {
+            const output = {
+                data: undefined,
+                pages: {
+                    current: page,
+                    prev: 0,
+                    hasPrev: false,
+                    next: 0,
+                    hasNext: false,
+                    total: 0
+                },
+                items: {
                     limit,
-                    skip: (page - 1) * limit,
-                    sort
-                };
+                    begin: ((page * limit) - limit) + 1,
+                    end: page * limit,
+                    total: 0
+                }
+            };
 
-                self.find(filter, fields, options, done);
-            }
-        }, (err, results) => {
+            fields = self.fieldsAdapter(fields);
+            sort = self.sortAdapter(sort);
 
-            if (err) {
-                return callback(err);
-            }
+            const options = {
+                limit,
+                skip: (page - 1) * limit,
+                sort
+            };
 
-            output.data = results.find;
-            output.items.total = results.count;
+            Promise.all([
+                self.count(filter),
+                self.find(filter, fields, options)
+            ]).then((results) => {
+                output.items.total = results[0];
+                output.data = results[1];
 
-            // paging calculations
-            output.pages.total = Math.ceil(output.items.total / limit);
-            output.pages.next = output.pages.current + 1;
-            output.pages.hasNext = output.pages.next <= output.pages.total;
-            output.pages.prev = output.pages.current - 1;
-            output.pages.hasPrev = output.pages.prev !== 0;
-            if (output.items.begin > output.items.total) {
-                output.items.begin = output.items.total;
-            }
-            if (output.items.end > output.items.total) {
-                output.items.end = output.items.total;
-            }
+                // paging calculations
+                output.pages.total = Math.ceil(output.items.total / limit);
+                output.pages.next = output.pages.current + 1;
+                output.pages.hasNext = output.pages.next <= output.pages.total;
+                output.pages.prev = output.pages.current - 1;
+                output.pages.hasPrev = output.pages.prev !== 0;
+                if (output.items.begin > output.items.total) {
+                    output.items.begin = output.items.total;
+                }
+                if (output.items.end > output.items.total) {
+                    output.items.end = output.items.total;
+                }
 
-            callback(null, output);
+                return resolve(output);
+            }).catch((err) => {
+                if (err) {
+                    return reject(err);
+                }
+            });
         });
     }
-
 
     static fieldsAdapter(fields) {
 
@@ -245,7 +234,7 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        collection.count.apply(collection, args);
+        return collection.count.apply(collection, args);
     }
 
 
@@ -269,9 +258,10 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
+        // const callback = this.resultFactory.bind(this, args.pop());
 
-        collection.find.apply(collection, args).toArray(callback);
+        // collection.find.apply(collection, args).toArray(callback);
+        return collection.find.apply(collection, args).toArray();
     }
 
 
@@ -286,7 +276,7 @@ class MongoModels {
         const callback = this.resultFactory.bind(this, args.pop());
 
         args.push(callback);
-        collection.findOne.apply(collection, args);
+        return collection.findOne.apply(collection, args);
     }
 
 
@@ -308,7 +298,7 @@ class MongoModels {
         args.push(options);
         args.push(callback);
 
-        collection.findOneAndUpdate.apply(collection, args);
+        return collection.findOneAndUpdate.apply(collection, args);
     }
 
 
@@ -323,9 +313,27 @@ class MongoModels {
         const callback = this.resultFactory.bind(this, args.pop());
 
         args.push(callback);
-        collection.findOneAndDelete.apply(collection, args);
+        return collection.findOneAndDelete.apply(collection, args);
     }
 
+    static findOneAndReplaceAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const filter = args.shift();
+        const doc = args.shift();
+        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
+
+        args.push(filter);
+        args.push(doc);
+        args.push(options);
+
+        return collection.findOneAndReplace.apply(collection, args);
+    }
 
     static findOneAndReplace() {
 
@@ -345,7 +353,31 @@ class MongoModels {
         args.push(options);
         args.push(callback);
 
-        collection.findOneAndReplace.apply(collection, args);
+        return collection.findOneAndReplace.apply(collection, args);
+    }
+
+    static findByIdAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const id = args.shift();
+        // const callback = this.resultFactory.bind(this, args.pop());
+        let filter;
+
+        try {
+            filter = { _id: this._idClass(id) };
+        }
+        catch (exception) {
+            return Promise.reject(exception);
+        }
+
+        args.unshift(filter);
+        // args.push(callback);
+        return collection.findOne.apply(collection, args);
     }
 
 
@@ -422,23 +454,7 @@ class MongoModels {
         collection.findOneAndDelete(filter, options, callback);
     }
 
-
-    static insertMany() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
-
-        args.push(callback);
-        collection.insertMany.apply(collection, args);
-    }
-
-
-    static insertOne() {
+    static insertManyAsync() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -446,14 +462,23 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
+        // const callback = this.resultFactory.bind(this, args.pop());
 
-        args.push(callback);
-        collection.insertOne.apply(collection, args);
+        // args.push(callback);
+        return collection.insertMany.apply(collection, args);
     }
 
+    static insertOneAsync() {
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
 
-    static updateMany() {
+        const collection = MongoModels.db.collection(this.collection);
+        return collection.insertOne.apply(collection, args);
+    }
+
+    static updateManyAsync() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -463,24 +488,42 @@ class MongoModels {
         const collection = MongoModels.db.collection(this.collection);
         const filter = args.shift();
         const update = args.shift();
-        const callback = args.pop();
         const options = Hoek.applyToDefaults({}, args.pop() || {});
 
         args.push(filter);
         args.push(update);
         args.push(options);
-        args.push((err, results) => {
 
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, results.modifiedCount, results);
-        });
-
-        collection.updateMany.apply(collection, args);
+        return collection.updateMany.apply(collection, args);
     }
 
+    static updateOneAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const filter = args.shift();
+        const update = args.shift();
+        // const callback = args.pop();
+        const options = Hoek.applyToDefaults({}, args.pop() || {});
+
+        args.push(filter);
+        args.push(update);
+        args.push(options);
+        // args.push((err, results) => {
+        //
+        //     if (err) {
+        //         return callback(err);
+        //     }
+        //
+        //     callback(null, results.modifiedCount, results);
+        // });
+
+        return collection.updateOne.apply(collection, args);
+    }
 
     static updateOne() {
 
@@ -510,6 +553,33 @@ class MongoModels {
         collection.updateOne.apply(collection, args);
     }
 
+    static replaceOneAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const filter = args.shift();
+        const doc = args.shift();
+        // const callback = args.pop();
+        const options = Hoek.applyToDefaults({}, args.pop() || {});
+
+        args.push(filter);
+        args.push(doc);
+        args.push(options);
+        // args.push((err, results) => {
+        //
+        //     if (err) {
+        //         return callback(err);
+        //     }
+        //
+        //     callback(null, results.modifiedCount, results);
+        // });
+
+        return collection.replaceOne.apply(collection, args);
+    }
 
     static replaceOne() {
 
@@ -539,6 +609,27 @@ class MongoModels {
         collection.replaceOne.apply(collection, args);
     }
 
+    static deleteOneAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        // const callback = args.pop();
+
+        // args.push((err, results) => {
+        //
+        //     if (err) {
+        //         return callback(err);
+        //     }
+        //
+        //     callback(null, results.deletedCount);
+        // });
+
+        return collection.deleteOne.apply(collection, args);
+    }
 
     static deleteOne() {
 
@@ -562,28 +653,33 @@ class MongoModels {
         collection.deleteOne.apply(collection, args);
     }
 
-
     static deleteMany() {
 
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
         const collection = MongoModels.db.collection(this.collection);
-        const callback = args.pop();
-
-        args.push((err, results) => {
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, results.deletedCount);
-        });
-
-        collection.deleteMany.apply(collection, args);
+        return collection.deleteMany.apply(collection, arguments);
     }
+
+    // static deleteMany() {
+    //
+    //     const args = new Array(arguments.length);
+    //     for (let i = 0; i < args.length; ++i) {
+    //         args[i] = arguments[i];
+    //     }
+    //
+    //     const collection = MongoModels.db.collection(this.collection);
+    //     const callback = args.pop();
+    //
+    //     args.push((err, results) => {
+    //
+    //         if (err) {
+    //             return callback(err);
+    //         }
+    //
+    //         callback(null, results.deletedCount);
+    //     });
+    //
+    //     collection.deleteMany.apply(collection, args);
+    // }
 }
 
 MongoModels._idClass = Mongodb.ObjectID;
