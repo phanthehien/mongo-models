@@ -799,7 +799,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const update = { name: 'New Name' };
 
                 return SubModel
-                    .findOneAndUpdateAsync(filter, update)
+                    .findOneAndUpdate(filter, update)
                     .then((result) => {
                         Code.expect(result).to.be.an.object();
                 });
@@ -816,7 +816,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const options = { returnOriginal: true };
 
             return SubModel
-                .findOneAndUpdateAsync(filter, update, options)
+                .findOneAndUpdate(filter, update, options)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -824,7 +824,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         });
     });
 
-    lab.test('it replaces a single document via findOneAndReplaceAsync', () => {
+    lab.test('it replaces a single document via findOneAndReplace', () => {
 
         const testDoc = { name: 'Ren' };
 
@@ -833,7 +833,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const doc = { isCool: true };
 
             return SubModel
-                .findOneAndReplaceAsync(filter, doc)
+                .findOneAndReplace(filter, doc)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -851,7 +851,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const doc = { isCool: true };
 
             return SubModel
-                .findOneAndReplaceAsync(filter, doc)
+                .findOneAndReplace(filter, doc)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -869,7 +869,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const options = { returnOriginal: true };
 
             SubModel
-                .findOneAndReplaceAsync(filter, doc, options)
+                .findOneAndReplace(filter, doc, options)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
             });
@@ -970,7 +970,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const filter = { name: 'Ren' };
 
             return SubModel
-                .findOneAndDeleteAsync(filter)
+                .findOneAndDelete(filter)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();

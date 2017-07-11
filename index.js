@@ -291,7 +291,7 @@ class MongoModels {
         return collection.findOne.apply(collection, args);
     }
 
-    static findOneAndUpdateAsync() {
+    static findOneAndUpdate() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -310,7 +310,7 @@ class MongoModels {
         return collection.findOneAndUpdate.apply(collection, args);
     }
 
-    static findOneAndDeleteAsync() {
+    static findOneAndDelete() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -322,7 +322,7 @@ class MongoModels {
         return collection.findOneAndDelete.apply(collection, args);
     }
 
-    static findOneAndReplaceAsync() {
+    static findOneAndReplace() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
