@@ -470,7 +470,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             };
 
             return SubModel
-                .updateOneAsync(filter, update)
+                .updateOne(filter, update)
                 .then((result) => {
                     Code.expect(result.modifiedCount).to.equal(1);
                 });
@@ -496,7 +496,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 };
                 const options = { upsert: true };
                 return SubModel
-                    .updateOneAsync(filter, update, options)
+                    .updateOne(filter, update, options)
                     .then((result) => {
                         Code.expect(result).to.be.an.object();
                         Code.expect(result.modifiedCount).to.equal(1);
@@ -521,7 +521,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const filter = {};
             const update = { $set: { isCool: true } };
 
-            return SubModel.updateOneAsync(filter, update).catch((err) => {
+            return SubModel.updateOne(filter, update).catch((err) => {
                 Code.expect(err).to.exist();
                 MongoModels.db.collection = realCollection;
             });
@@ -544,7 +544,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const update = { $set: { isCool: true } };
 
                 return SubModel
-                    .updateManyAsync(filter, update)
+                    .updateMany(filter, update)
                     .then((result) => {
                         Code.expect(result.modifiedCount).to.equal(3);
                     });
@@ -566,7 +566,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const update = { $set: { isCool: true } };
                 const options = { upsert: true };
 
-                return SubModel.updateManyAsync(filter, update, options).then((result) => {
+                return SubModel.updateMany(filter, update, options).then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.modifiedCount).to.equal(3);
                 });
@@ -593,7 +593,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const filter = {};
                 const update = { $set: { isCool: true } };
 
-                return SubModel.updateManyAsync(filter, update).catch((err) => {
+                return SubModel.updateMany(filter, update).catch((err) => {
                     Code.expect(err).to.exist();
                     MongoModels.db.collection = realCollection;
                 });
@@ -884,7 +884,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const filter = { name: 'Ren' };
                 const doc = { isCool: true };
 
-                return SubModel.replaceOneAsync(filter, doc).then((result) => {
+                return SubModel.replaceOne(filter, doc).then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.modifiedCount).to.equal(1);
                 });
@@ -902,7 +902,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const doc = { isCool: true };
 
                 return SubModel
-                    .replaceOneAsync(filter, doc)
+                    .replaceOne(filter, doc)
                     .then((result) => {
                         Code.expect(result.result).to.be.an.object();
                         Code.expect(result.modifiedCount).to.equal(1);
@@ -923,7 +923,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const options = { upsert: true };
 
             return SubModel
-                .replaceOneAsync(filter, doc, options)
+                .replaceOne(filter, doc, options)
                 .then((result) => {
                     Code.expect(result.result).to.be.an.object();
                     Code.expect(result.modifiedCount).to.equal(1);
@@ -954,7 +954,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 const doc = { isCool: true };
 
                 return SubModel
-                    .replaceOneAsync(filter, doc)
+                    .replaceOne(filter, doc)
                     .catch((err) => {
                         Code.expect(err).to.exist();
                         MongoModels.db.collection = realCollection;
@@ -1030,7 +1030,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         return SubModel.insertOne(testDoc).then((record) => {
             const _id = record.ops[0]._id;
             return SubModel
-                .deleteOneAsync({ _id })
+                .deleteOne({ _id })
                 .then((result) => {
                     Code.expect(result.deletedCount).to.equal(1);
                 });
@@ -1044,7 +1044,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             .insertOne(testDoc)
             .then((doc) => {
                 return SubModel
-                    .deleteOneAsync({})
+                    .deleteOne({})
                     .then((result) => {
                         Code.expect(result).to.be.an.object();
                         Code.expect(result.deletedCount).to.equal(1);
@@ -1071,7 +1071,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                     };
                 };
 
-                return SubModel.deleteOneAsync({}).catch((err) => {
+                return SubModel.deleteOne({}).catch((err) => {
                     Code.expect(err).to.exist();
                     MongoModels.db.collection = realCollection;
                 });

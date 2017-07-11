@@ -428,7 +428,7 @@ class MongoModels {
         return collection.insertOne.apply(collection, args);
     }
 
-    static updateManyAsync() {
+    static updateMany() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -447,7 +447,7 @@ class MongoModels {
         return collection.updateMany.apply(collection, args);
     }
 
-    static updateOneAsync() {
+    static updateOne() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -466,7 +466,7 @@ class MongoModels {
         return collection.updateOne.apply(collection, args);
     }
 
-    static replaceOneAsync() {
+    static replaceOne() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -485,7 +485,7 @@ class MongoModels {
         return collection.replaceOne.apply(collection, args);
     }
 
-    static deleteOneAsync() {
+    static deleteOne() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
