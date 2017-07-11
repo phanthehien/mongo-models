@@ -295,7 +295,7 @@ lab.experiment('MongoModels Paged Find', () => {
         const sort = { _id: -1 };
 
         return SubModel
-            .pagedFindAsync(filter, fields, sort, limit, page)
+            .pagedFind(filter, fields, sort, limit, page)
             .catch((err) => {
                 Code.expect(err).to.be.an.object();
                 SubModel.count = realCount;
@@ -318,7 +318,7 @@ lab.experiment('MongoModels Paged Find', () => {
             const page = 1;
             const sort = { _id: -1 };
 
-            return SubModel.pagedFindAsync(filter, fields, sort, limit, page).then((docs) => {
+            return SubModel.pagedFind(filter, fields, sort, limit, page).then((docs) => {
                 Code.expect(docs).to.be.an.object();
                 Code.expect(docs.data).to.be.an.array();
                 Code.expect(docs.data.length).to.be.equal(3);
@@ -342,7 +342,7 @@ lab.experiment('MongoModels Paged Find', () => {
             const sort = { _id: -1 };
 
             return SubModel
-                .pagedFindAsync(filter, fields, sort, limit, page)
+                .pagedFind(filter, fields, sort, limit, page)
                 .then((docs) => {
                     Code.expect(docs).to.be.an.object();
                     Code.expect(docs.data).to.be.an.array();
@@ -372,7 +372,7 @@ lab.experiment('MongoModels Paged Find', () => {
                 const sort = { _id: -1 };
 
                 return SubModel
-                    .pagedFindAsync(filter, fields, sort, limit, page)
+                    .pagedFind(filter, fields, sort, limit, page)
                     .then((docs) => {
                         Code.expect(docs).to.be.an.object();
                         Code.expect(docs.data).to.be.an.array();

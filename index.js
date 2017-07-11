@@ -106,7 +106,7 @@ class MongoModels {
         next.apply(undefined, args);
     }
 
-    static pagedFindAsync(filter, fields, sort, limit, page) {
+    static pagedFind(filter, fields, sort, limit, page) {
 
         const self = this;
         return new Promise(function (resolve, reject) {
