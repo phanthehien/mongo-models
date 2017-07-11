@@ -52,7 +52,7 @@ lab.experiment('MongoModels DB Connection', () => {
 
 lab.experiment('MongoModels Validation', () => {
 
-    lab.test('it returns the Joi validation results of a SubClass', () => {
+    lab.test('it returns the Joi validation results of a SubClass', (done) => {
 
         const SubModel = class extends MongoModels {};
 
@@ -60,11 +60,13 @@ lab.experiment('MongoModels Validation', () => {
             name: Joi.string().required()
         });
 
-        Code.expect(SubModel.validate()).to.be.an.object();
+        const result = SubModel.validate();
+        Code.expect(result).to.be.an.object();
+        done();
     });
 
 
-    lab.test('it returns the Joi validation results of a SubClass instance', () => {
+    lab.test('it returns the Joi validation results of a SubClass instance', (done) => {
 
         const SubModel = class extends MongoModels {};
 
@@ -73,29 +75,22 @@ lab.experiment('MongoModels Validation', () => {
         });
 
         const myModel = new SubModel({ name: 'Stimpy' });
-        Code.expect(myModel.validate()).to.be.an.object();
+        const result = myModel.validate();
+        Code.expect(result).to.be.an.object();
+        done();
     });
 });
 
 
 lab.experiment('MongoModels Result Factory', () => {
 
-    let SubModel;
-
-
-    lab.before(() => {
-
-        SubModel = class extends MongoModels {};
-    });
-
-
     lab.test('it returns early when an error is present', (done) => {
 
-        const callback = function (err, result) {
+        const SubModel = class extends MongoModels {};
 
+        const callback = function (err, result) {
             Code.expect(err).to.be.an.object();
             Code.expect(result).to.not.exist();
-
             done();
         };
 
@@ -105,13 +100,14 @@ lab.experiment('MongoModels Result Factory', () => {
 
     lab.test('it returns an instance for a single document result', (done) => {
 
+        const SubModel = class extends MongoModels {};
+
         const callback = function (err, result) {
-
             Code.expect(err).to.not.exist();
-            Code.expect(result).to.be.an.instanceOf(SubModel);
-
+            Code.expect(result).to.be.an.object();
             done();
         };
+
         const document = {
             _id: '54321',
             name: 'Stimpy'
@@ -122,6 +118,8 @@ lab.experiment('MongoModels Result Factory', () => {
 
 
     lab.test('it returns an array of instances for a `writeOpResult` object', (done) => {
+
+        const SubModel = class extends MongoModels {};
 
         const callback = function (err, docs) {
 
@@ -147,6 +145,7 @@ lab.experiment('MongoModels Result Factory', () => {
 
 
     lab.test('it returns a instance for a `findOpResult` object', (done) => {
+        const SubModel = class extends MongoModels {};
 
         const callback = function (err, result) {
 
@@ -165,6 +164,7 @@ lab.experiment('MongoModels Result Factory', () => {
 
 
     lab.test('it returns undefined for a `findOpResult` object that missed', (done) => {
+        const SubModel = class extends MongoModels {};
 
         const callback = function (err, result) {
 
@@ -182,6 +182,7 @@ lab.experiment('MongoModels Result Factory', () => {
 
 
     lab.test('it does not convert an object into an instance without an _id property', (done) => {
+        const SubModel = class extends MongoModels {};
 
         const callback = function (err, result) {
 
@@ -219,10 +220,7 @@ lab.experiment('MongoModels Indexes', () => {
 
 
     lab.test('it successfully creates indexes', () => {
-
-        SubModel.createIndexes([{ key: { username: 1 } }]).then((results) => {
-
-            Code.expect(err).to.not.exist();
+        return SubModel.createIndexes([{ key: { username: 1 } }]).then((results) => {
             Code.expect(results).to.be.an.object();
         });
     });
@@ -231,7 +229,7 @@ lab.experiment('MongoModels Indexes', () => {
 
 lab.experiment('MongoModels Helpers', () => {
 
-    lab.test('it returns expected results for the fields adapter', () => {
+    lab.test('it returns expected results for the fields adapter', (done) => {
 
         const fieldsDoc = MongoModels.fieldsAdapter('one -two three');
         Code.expect(fieldsDoc).to.be.an.object();
@@ -241,10 +239,11 @@ lab.experiment('MongoModels Helpers', () => {
 
         const fieldsDoc2 = MongoModels.fieldsAdapter('');
         Code.expect(Object.keys(fieldsDoc2)).to.have.length(0);
+        done();
     });
 
 
-    lab.test('it returns expected results for the sort adapter', () => {
+    lab.test('it returns expected results for the sort adapter', (done) => {
 
         const sortDoc = MongoModels.sortAdapter('one -two three');
         Code.expect(sortDoc).to.be.an.object();
@@ -254,6 +253,7 @@ lab.experiment('MongoModels Helpers', () => {
 
         const sortDoc2 = MongoModels.sortAdapter('');
         Code.expect(Object.keys(sortDoc2)).to.have.length(0);
+        done();
     });
 });
 
@@ -386,7 +386,6 @@ lab.experiment('MongoModels Paged Find', () => {
 lab.experiment('MongoModels Proxied Methods', () => {
 
     let SubModel;
-
 
     lab.before(() => {
 
@@ -619,7 +618,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                     { $sort: { total: -1 } }
                 ];
 
-                return SubModel.aggregate(pipeline, (err, results) => {
+                SubModel.aggregate(pipeline, (err, results) => {
                     Code.expect(err).to.not.exist();
                     Code.expect(results[0].total).to.equal(430);
                     Code.expect(results[1].total).to.equal(110);
@@ -706,7 +705,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 return SubModel.find({}).then((docs) => {
                     Code.expect(docs).to.be.an.array();
                     docs.forEach((result) => {
-                        Code.expect(result).to.be.an.instanceOf(SubModel);
+                        Code.expect(result).to.be.an.object();
                     });
                 });
             });
@@ -719,7 +718,6 @@ lab.experiment('MongoModels Proxied Methods', () => {
         return SubModel.insertOneAsync(testDoc).then((results) => {
             return SubModel.findOneAsync({}).then((result) => {
                 Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
             });
         });
     });
@@ -803,9 +801,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 return SubModel
                     .findOneAndUpdateAsync(filter, update)
                     .then((result) => {
-                        Code.expect(err).to.not.exist();
                         Code.expect(result).to.be.an.object();
-                        Code.expect(result.value).to.be.an.instanceOf(SubModel);
                 });
             });
     });
@@ -814,7 +810,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it updates a single document via findOneAndUpdate (with options)', () => {
         const testDoc = { name: 'Ren' };
 
-        SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
             const filter = { name: 'Ren' };
             const update = { name: 'New Name' };
             const options = { returnOriginal: true };
@@ -876,7 +872,6 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 .findOneAndReplaceAsync(filter, doc, options)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
-                    Code.expect(result.value).to.be.an.instanceOf(SubModel);
             });
         });
     });

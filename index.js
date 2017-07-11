@@ -225,14 +225,24 @@ class MongoModels {
     }
 
     static aggregateAsync() {
+        const self = this;
+        const methodArgs = arguments;
         return new Promise(function (resolve, reject) {
-            return MongoModels.aggregate(arguments, (err, results) => {
-                if (err) {
-                    return reject(err);
+                const args = new Array(methodArgs.length);
+                for (let i = 0; i < args.length; ++i) {
+                    args[i] = methodArgs[i];
                 }
 
-                return resolve(results);
-            })
+                args.push((err, results) => {
+                    if (err) {
+                        return reject(err);
+                    }
+
+                    return resolve(results);
+                });
+
+                const collection = MongoModels.db.collection(self.collection);
+                collection.aggregate.apply(collection, args);
         });
     }
 
@@ -269,9 +279,6 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        // const callback = this.resultFactory.bind(this, args.pop());
-
-        // collection.find.apply(collection, args).toArray(callback);
         return collection.find.apply(collection, args).toArray();
     }
 
@@ -305,28 +312,6 @@ class MongoModels {
         return collection.findOneAndUpdate.apply(collection, args);
     }
 
-
-    static findOneAndUpdate() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
-        const filter = args.shift();
-        const doc = args.shift();
-        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
-
-        args.push(filter);
-        args.push(doc);
-        args.push(options);
-        args.push(callback);
-
-        return collection.findOneAndUpdate.apply(collection, args);
-    }
-
     static findOneAndDeleteAsync() {
 
         const args = new Array(arguments.length);
@@ -336,20 +321,6 @@ class MongoModels {
 
         const collection = MongoModels.db.collection(this.collection);
 
-        return collection.findOneAndDelete.apply(collection, args);
-    }
-
-    static findOneAndDelete() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
-
-        args.push(callback);
         return collection.findOneAndDelete.apply(collection, args);
     }
 
@@ -368,27 +339,6 @@ class MongoModels {
         args.push(filter);
         args.push(doc);
         args.push(options);
-
-        return collection.findOneAndReplace.apply(collection, args);
-    }
-
-    static findOneAndReplace() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
-        const filter = args.shift();
-        const doc = args.shift();
-        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
-
-        args.push(filter);
-        args.push(doc);
-        args.push(options);
-        args.push(callback);
 
         return collection.findOneAndReplace.apply(collection, args);
     }
@@ -415,31 +365,6 @@ class MongoModels {
         return collection.findOne.apply(collection, args);
     }
 
-
-    static findById() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const id = args.shift();
-        const callback = this.resultFactory.bind(this, args.pop());
-        let filter;
-
-        try {
-            filter = { _id: this._idClass(id) };
-        }
-        catch (exception) {
-            return callback(exception);
-        }
-
-        args.unshift(filter);
-        args.push(callback);
-        collection.findOne.apply(collection, args);
-    }
-
     static findByIdAndUpdateAsync() {
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -460,31 +385,6 @@ class MongoModels {
         }
 
         return collection.findOneAndUpdate(filter, update, options);
-    }
-
-
-    static findByIdAndUpdate() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const id = args.shift();
-        const update = args.shift();
-        const callback = this.resultFactory.bind(this, args.pop());
-        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
-        let filter;
-
-        try {
-            filter = { _id: this._idClass(id) };
-        }
-        catch (exception) {
-            return callback(exception);
-        }
-
-        collection.findOneAndUpdate(filter, update, options, callback);
     }
 
     static findByIdAndDeleteAsync() {
@@ -509,30 +409,6 @@ class MongoModels {
         return collection.findOneAndDelete(filter, options);
     }
 
-
-    static findByIdAndDelete() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const id = args.shift();
-        const callback = this.resultFactory.bind(this, args.pop());
-        const options = Hoek.applyToDefaults({}, args.pop() || {});
-        let filter;
-
-        try {
-            filter = { _id: this._idClass(id) };
-        }
-        catch (exception) {
-            return callback(exception);
-        }
-
-        collection.findOneAndDelete(filter, options, callback);
-    }
-
     static insertManyAsync() {
 
         const args = new Array(arguments.length);
@@ -541,9 +417,6 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        // const callback = this.resultFactory.bind(this, args.pop());
-
-        // args.push(callback);
         return collection.insertMany.apply(collection, args);
     }
 
@@ -586,50 +459,13 @@ class MongoModels {
         const collection = MongoModels.db.collection(this.collection);
         const filter = args.shift();
         const update = args.shift();
-        // const callback = args.pop();
         const options = Hoek.applyToDefaults({}, args.pop() || {});
 
         args.push(filter);
         args.push(update);
         args.push(options);
-        // args.push((err, results) => {
-        //
-        //     if (err) {
-        //         return callback(err);
-        //     }
-        //
-        //     callback(null, results.modifiedCount, results);
-        // });
 
         return collection.updateOne.apply(collection, args);
-    }
-
-    static updateOne() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const filter = args.shift();
-        const update = args.shift();
-        const callback = args.pop();
-        const options = Hoek.applyToDefaults({}, args.pop() || {});
-
-        args.push(filter);
-        args.push(update);
-        args.push(options);
-        args.push((err, results) => {
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, results.modifiedCount, results);
-        });
-
-        collection.updateOne.apply(collection, args);
     }
 
     static replaceOneAsync() {
@@ -642,50 +478,13 @@ class MongoModels {
         const collection = MongoModels.db.collection(this.collection);
         const filter = args.shift();
         const doc = args.shift();
-        // const callback = args.pop();
         const options = Hoek.applyToDefaults({}, args.pop() || {});
 
         args.push(filter);
         args.push(doc);
         args.push(options);
-        // args.push((err, results) => {
-        //
-        //     if (err) {
-        //         return callback(err);
-        //     }
-        //
-        //     callback(null, results.modifiedCount, results);
-        // });
 
         return collection.replaceOne.apply(collection, args);
-    }
-
-    static replaceOne() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const filter = args.shift();
-        const doc = args.shift();
-        const callback = args.pop();
-        const options = Hoek.applyToDefaults({}, args.pop() || {});
-
-        args.push(filter);
-        args.push(doc);
-        args.push(options);
-        args.push((err, results) => {
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, results.modifiedCount, results);
-        });
-
-        collection.replaceOne.apply(collection, args);
     }
 
     static deleteOneAsync() {
@@ -698,28 +497,6 @@ class MongoModels {
         const collection = MongoModels.db.collection(this.collection);
 
         return collection.deleteOne.apply(collection, args);
-    }
-
-    static deleteOne() {
-
-        const args = new Array(arguments.length);
-        for (let i = 0; i < args.length; ++i) {
-            args[i] = arguments[i];
-        }
-
-        const collection = MongoModels.db.collection(this.collection);
-        const callback = args.pop();
-
-        args.push((err, results) => {
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, results.deletedCount);
-        });
-
-        collection.deleteOne.apply(collection, args);
     }
 
     static deleteMany() {
