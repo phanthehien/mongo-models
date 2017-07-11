@@ -1,5 +1,4 @@
 'use strict';
-const Async = require('async');
 const Hoek = require('hoek');
 const Joi = require('joi');
 const Mongodb = require('mongodb');
@@ -13,7 +12,7 @@ class MongoModels {
 
     static connect(uri, options) {
 
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
 
             Mongodb.MongoClient.connect(uri, options, (err, db) => {
 
@@ -27,6 +26,7 @@ class MongoModels {
     }
 
     static disconnect() {
+
         return MongoModels.db.close();
     }
 
@@ -109,7 +109,8 @@ class MongoModels {
     static pagedFind(filter, fields, sort, limit, page) {
 
         const self = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
+
             const output = {
                 data: undefined,
                 pages: {
@@ -141,6 +142,7 @@ class MongoModels {
                 self.count(filter),
                 self.find(filter, fields, options)
             ]).then((results) => {
+
                 output.items.total = results[0];
                 output.data = results[1];
 
@@ -159,6 +161,7 @@ class MongoModels {
 
                 return resolve(output);
             }).catch((err) => {
+
                 return reject(err);
             });
         });
@@ -223,24 +226,27 @@ class MongoModels {
     }
 
     static aggregateAsync() {
+
         const self = this;
         const methodArgs = arguments;
-        return new Promise(function (resolve, reject) {
-                const args = new Array(methodArgs.length);
-                for (let i = 0; i < args.length; ++i) {
-                    args[i] = methodArgs[i];
+        return new Promise((resolve, reject) => {
+
+            const args = new Array(methodArgs.length);
+            for (let i = 0; i < args.length; ++i) {
+                args[i] = methodArgs[i];
+            }
+
+            args.push((err, results) => {
+
+                if (err) {
+                    return reject(err);
                 }
 
-                args.push((err, results) => {
-                    if (err) {
-                        return reject(err);
-                    }
+                return resolve(results);
+            });
 
-                    return resolve(results);
-                });
-
-                const collection = MongoModels.db.collection(self.collection);
-                collection.aggregate.apply(collection, args);
+            const collection = MongoModels.db.collection(self.collection);
+            collection.aggregate.apply(collection, args);
         });
     }
 
@@ -281,6 +287,7 @@ class MongoModels {
     }
 
     static findOne() {
+
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];
@@ -364,6 +371,7 @@ class MongoModels {
     }
 
     static findByIdAndUpdate() {
+
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];
@@ -419,6 +427,7 @@ class MongoModels {
     }
 
     static insertOne() {
+
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];
