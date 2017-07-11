@@ -159,9 +159,7 @@ class MongoModels {
 
                 return resolve(output);
             }).catch((err) => {
-                if (err) {
-                    return reject(err);
-                }
+                return reject(err);
             });
         });
     }
