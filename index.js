@@ -407,7 +407,7 @@ class MongoModels {
         return collection.findOneAndDelete(filter, options);
     }
 
-    static insertManyAsync() {
+    static insertMany() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -418,7 +418,7 @@ class MongoModels {
         return collection.insertMany.apply(collection, args);
     }
 
-    static insertOneAsync() {
+    static insertOne() {
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];

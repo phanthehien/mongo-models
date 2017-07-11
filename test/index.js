@@ -311,7 +311,7 @@ lab.experiment('MongoModels Paged Find', () => {
             { name: 'Yak' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((result) => {
+        return SubModel.insertMany(testDocs).then((result) => {
             const filter = {};
             let fields;
             const limit = 10;
@@ -334,7 +334,7 @@ lab.experiment('MongoModels Paged Find', () => {
             { name: 'Yak' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((result) => {
+        return SubModel.insertMany(testDocs).then((result) => {
             const filter = {};
             let fields;
             const limit = 2;
@@ -361,7 +361,7 @@ lab.experiment('MongoModels Paged Find', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((results) => {
                 Code.expect(results).to.be.an.object();
 
@@ -420,7 +420,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((docs) => {
                 Code.expect(docs).to.be.an.object();
                 Code.expect(docs.insertedIds).to.be.an.array();
@@ -433,7 +433,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Horse' };
 
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((docs) => {
                 Code.expect(docs.insertedCount).to.equal(1);
             });
@@ -447,7 +447,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((docs) => {
                 Code.expect(docs.insertedCount).to.equal(2);
             });
@@ -461,7 +461,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             { name: 'Yak' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((results) => {
+        return SubModel.insertMany(testDocs).then((results) => {
             const filter = {
                 _id: results.insertedIds[0]
             };
@@ -486,7 +486,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((results) => {
                 const filter = {
                     _id: results.insertedIds[0]
@@ -508,7 +508,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it returns an error when updateOne fails', () => {
 
         const testDoc = { name: 'Ren' };
-        return SubModel.insertOneAsync(testDoc).then((results) => {
+        return SubModel.insertOne(testDoc).then((results) => {
             const realCollection = MongoModels.db.collection;
             MongoModels.db.collection = function () {
                 return {
@@ -538,7 +538,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((result) => {
                 const filter = {};
                 const update = { $set: { isCool: true } };
@@ -560,7 +560,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then(() => {
                 const filter = {};
                 const update = { $set: { isCool: true } };
@@ -578,7 +578,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((result) => {
                 const realCollection = MongoModels.db.collection;
                 MongoModels.db.collection = function () {
@@ -610,7 +610,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then(() => {
                 const pipeline = [
                     { $match: {} },
@@ -639,7 +639,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then(() => {
                 const pipeline = [
                     { $match: {} },
@@ -667,7 +667,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             { name: 'Yak' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((results) => {
+        return SubModel.insertMany(testDocs).then((results) => {
             return SubModel.count({}).then((result) => {
                 Code.expect(result).to.be.a.number();
                 Code.expect(result).to.equal(3);
@@ -683,7 +683,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             { name: 'Yak', group: 'Foe' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((docs) => {
+        return SubModel.insertMany(testDocs).then((docs) => {
             return SubModel.distinct('group').then((values) => {
                 Code.expect(values).to.be.an.array();
                 Code.expect(values.length).to.equal(2);
@@ -700,7 +700,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((docs) => {
                 return SubModel.find({}).then((docs) => {
                     Code.expect(docs).to.be.an.array();
@@ -715,7 +715,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it returns a single result', () => {
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((results) => {
+        return SubModel.insertOne(testDoc).then((results) => {
             return SubModel.findOne({}).then((result) => {
                 Code.expect(result).to.be.an.object();
             });
@@ -724,7 +724,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
     lab.test('it returns a single result via id Async', () => {
         const testDoc = { name: 'Ren' };
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const id = doc.insertedId;
 
             return SubModel.findById(id)
@@ -745,7 +745,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const id = doc.insertedId;
             const update = { name: 'New Name' };
 
@@ -773,7 +773,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const id = doc.insertedId;
             const update = { name: 'New Name' };
             const options = { returnOriginal: false };
@@ -793,7 +793,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
 
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((results) => {
                 const filter = { name: 'Ren' };
                 const update = { name: 'New Name' };
@@ -810,7 +810,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it updates a single document via findOneAndUpdate (with options)', () => {
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const filter = { name: 'Ren' };
             const update = { name: 'New Name' };
             const options = { returnOriginal: true };
@@ -828,7 +828,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((results) => {
+        return SubModel.insertOne(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
 
@@ -846,7 +846,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((results) => {
+        return SubModel.insertOne(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
 
@@ -863,7 +863,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it replaces a single document via findOneAndReplace (with options)', () => {
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((results) => {
+        return SubModel.insertOne(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
             const options = { returnOriginal: true };
@@ -879,7 +879,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it replaces one document and returns the result Async', () => {
         const testDoc = { name: 'Ren' };
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((results) => {
                 const filter = { name: 'Ren' };
                 const doc = { isCool: true };
@@ -896,7 +896,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
 
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((results) => {
                 const filter = { name: 'Ren' };
                 const doc = { isCool: true };
@@ -917,7 +917,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((result) => {
+        return SubModel.insertOne(testDoc).then((result) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
             const options = { upsert: true };
@@ -938,7 +938,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
 
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((results) => {
                 const realCollection = MongoModels.db.collection;
                 MongoModels.db.collection = function () {
@@ -966,7 +966,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it deletes a document via findOneAndDelete', () => {
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const filter = { name: 'Ren' };
 
             return SubModel
@@ -983,7 +983,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it deletes a document via findByIdAndDelete', () => {
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const id = doc.insertedId;
 
             return SubModel
@@ -1000,7 +1000,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
         const testDoc = { name: 'Ren' };
 
-        return SubModel.insertOneAsync(testDoc).then((doc) => {
+        return SubModel.insertOne(testDoc).then((doc) => {
             const id = doc.insertedId;
             const options = {
                 projection: {
@@ -1027,7 +1027,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
     lab.test('it deletes one document via deleteOne Async', () => {
         const testDoc = { name: 'Ren' };
-        return SubModel.insertOneAsync(testDoc).then((record) => {
+        return SubModel.insertOne(testDoc).then((record) => {
             const _id = record.ops[0]._id;
             return SubModel
                 .deleteOneAsync({ _id })
@@ -1041,7 +1041,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
 
         return SubModel
-            .insertOneAsync(testDoc)
+            .insertOne(testDoc)
             .then((doc) => {
                 return SubModel
                     .deleteOneAsync({})
@@ -1060,7 +1060,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((result) => {
                 const realCollection = MongoModels.db.collection;
                 MongoModels.db.collection = function () {
@@ -1085,7 +1085,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             { name: 'Stimpy' }
         ];
 
-        return SubModel.insertManyAsync(testDocs).then((insertResult) => {
+        return SubModel.insertMany(testDocs).then((insertResult) => {
             return SubModel.deleteMany({}).then((result) => {
                 Code.expect(result.deletedCount).to.equal(2);
             });
@@ -1099,7 +1099,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((doc) => {
                 SubModel.deleteMany({}).then((result) => {
                     Code.expect(result).to.be.an.object();
@@ -1117,7 +1117,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel
-            .insertManyAsync(testDocs)
+            .insertMany(testDocs)
             .then((result) => {
                 const realCollection = MongoModels.db.collection;
                 MongoModels.db.collection = function () {
