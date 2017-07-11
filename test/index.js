@@ -716,7 +716,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
 
         return SubModel.insertOneAsync(testDoc).then((results) => {
-            return SubModel.findOneAsync({}).then((result) => {
+            return SubModel.findOne({}).then((result) => {
                 Code.expect(result).to.be.an.object();
             });
         });

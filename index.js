@@ -280,7 +280,7 @@ class MongoModels {
         return collection.find.apply(collection, args).toArray();
     }
 
-    static findOneAsync() {
+    static findOne() {
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];
