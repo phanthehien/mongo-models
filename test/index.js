@@ -124,6 +124,28 @@ lab.experiment('MongoModels Result Factory', () => {
         SubModel.resultFactory(callback, undefined, document);
     });
 
+    lab.test('it returns an instance for array result', (done) => {
+
+        const SubModel = class extends MongoModels {
+        };
+
+        const callback = function (err, result) {
+
+            Code.expect(err).to.not.exist();
+            Code.expect(result).to.be.an.array();
+            done();
+        };
+
+        const documents = [{
+            _id: '54321',
+            name: 'Stimpy'
+        }, {
+            _id: '123456',
+            name: 'YpmitS'
+        }];
+
+        SubModel.resultFactory(callback, undefined, documents);
+    });
 
     lab.test('it returns an array of instances for a `writeOpResult` object', (done) => {
 
@@ -703,6 +725,32 @@ lab.experiment('MongoModels Proxied Methods', () => {
             });
     });
 
+    lab.test('it returns errors from a collection Async', () => {
+
+        const testDocs = [
+            { name: 'Ren', group: 'Friend', count: 100 },
+            { name: 'Stimpy', group: 'Friend', count: 10 },
+            { name: 'Yak', group: 'Foe', count: 430 }
+        ];
+
+        return SubModel
+            .insertMany(testDocs)
+            .then(() => {
+
+                const pipeline = [
+                    { $match: {} },
+                    { $group: { _id: '$group', total: { $$$sum: '$count' } } },
+                    { $sort: { total: -1 } }
+                ];
+
+                return SubModel
+                    .aggregateAsync(pipeline)
+                    .catch((err) => {
+
+                        Code.expect(err).to.be.a.object();
+                    });
+            });
+    });
 
     lab.test('it returns a collection count', () => {
 
