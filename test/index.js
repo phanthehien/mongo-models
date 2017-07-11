@@ -686,10 +686,6 @@ lab.experiment('MongoModels Proxied Methods', () => {
                     Code.expect(results[0].total).to.equal(430);
                     Code.expect(results[1].total).to.equal(110);
                     done();
-                }).catch((err) => {
-
-                    console.log('Error or aggregate', err);
-                    done();
                 });
             });
     });
@@ -718,9 +714,6 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
                         Code.expect(results[0].total).to.equal(430);
                         Code.expect(results[1].total).to.equal(110);
-                    }).catch((err) => {
-
-                        console.log('Error or aggregate', err);
                     });
             });
     });
@@ -745,6 +738,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
                 return SubModel
                     .aggregateAsync(pipeline)
+                    .then(() => {})
                     .catch((err) => {
 
                         Code.expect(err).to.be.a.object();
