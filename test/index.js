@@ -631,335 +631,208 @@ lab.experiment('MongoModels Proxied Methods', () => {
         });
     });
 
+    lab.test('it returns aggregate results from a collection Async', () => {
 
-    lab.test('it returns a collection count', (done) => {
+        const testDocs = [
+            { name: 'Ren', group: 'Friend', count: 100 },
+            { name: 'Stimpy', group: 'Friend', count: 10 },
+            { name: 'Yak', group: 'Foe', count: 430 }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren' },
-                    { name: 'Stimpy' },
-                    { name: 'Yak' }
+        return SubModel
+            .insertManyAsync(testDocs)
+            .then(() => {
+                const pipeline = [
+                    { $match: {} },
+                    { $group: { _id: '$group', total: { $sum: '$count' } } },
+                    { $sort: { total: -1 } }
                 ];
 
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
+                return SubModel
+                    .aggregateAsync(pipeline)
+                    .then((results) => {
+                        Code.expect(results[0].total).to.equal(430);
+                        Code.expect(results[1].total).to.equal(110);
+                    }).catch(err => {
+                        console.log('Error or aggregate', err);
+                    });
+            });
+    });
 
-            if (err) {
-                return done(err);
-            }
 
-            SubModel.count({}, (err, result) => {
+    lab.test('it returns a collection count', () => {
 
-                Code.expect(err).to.not.exist();
+        const testDocs = [
+            { name: 'Ren' },
+            { name: 'Stimpy' },
+            { name: 'Yak' }
+        ];
+
+        return SubModel.insertManyAsync(testDocs).then((results) => {
+            return SubModel.count({}).then((result) => {
                 Code.expect(result).to.be.a.number();
                 Code.expect(result).to.equal(3);
-
-                done();
             });
         });
     });
 
 
-    lab.test('it returns distinct results from a collection', (done) => {
+    lab.test('it returns distinct results from a collection', () => {
+        const testDocs = [
+            { name: 'Ren', group: 'Friend' },
+            { name: 'Stimpy', group: 'Friend' },
+            { name: 'Yak', group: 'Foe' }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren', group: 'Friend' },
-                    { name: 'Stimpy', group: 'Friend' },
-                    { name: 'Yak', group: 'Foe' }
-                ];
-
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            SubModel.distinct('group', (err, values) => {
-
-                Code.expect(err).to.not.exist();
+        return SubModel.insertManyAsync(testDocs).then((docs) => {
+            return SubModel.distinct('group').then((values) => {
                 Code.expect(values).to.be.an.array();
                 Code.expect(values.length).to.equal(2);
-
-                done();
             });
         });
     });
 
 
-    lab.test('it returns a result array', (done) => {
+    lab.test('it returns a result array', () => {
+        const testDocs = [
+            { name: 'Ren' },
+            { name: 'Stimpy' },
+            { name: 'Yak' }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren' },
-                    { name: 'Stimpy' },
-                    { name: 'Yak' }
-                ];
-
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            SubModel.find({}, (err, docs) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(docs).to.be.an.array();
-
-                docs.forEach((result) => {
-
-                    Code.expect(result).to.be.an.instanceOf(SubModel);
+        return SubModel
+            .insertManyAsync(testDocs)
+            .then((docs) => {
+                return SubModel.find({}).then((docs) => {
+                    Code.expect(docs).to.be.an.array();
+                    docs.forEach((result) => {
+                        Code.expect(result).to.be.an.instanceOf(SubModel);
+                    });
                 });
-
-                done();
             });
-        });
     });
 
 
-    lab.test('it returns a single result', (done) => {
+    lab.test('it returns a single result', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            SubModel.findOne({}, (err, result) => {
-
-                Code.expect(err).to.not.exist();
+        return SubModel.insertOneAsync(testDoc).then((results) => {
+            return SubModel.findOneAsync({}).then((result) => {
                 Code.expect(result).to.be.an.object();
                 Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
             });
         });
     });
 
     lab.test('it returns a single result via id Async', () => {
-
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-            const id = results.setup[0]._id;
+        const testDoc = { name: 'Ren' };
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
+            const id = doc.insertedId;
 
             return SubModel.findByIdAsync(id)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
-                    Code.expect(result).to.be.an.instanceOf(SubModel);
                 })
-                .catch((err) => {
-                    Code.expect(err).to.be.an.object();
+        });
+    });
+
+    lab.test('it returns and error when id casting fails during findById', () => {
+        return SubModel.findByIdAsync('NOTVALIDOBJECTID').catch((err) => {
+            Code.expect(err).to.exist();
+        });
+    });
+
+
+    lab.test('it updates a single document via findByIdAndUpdate', () => {
+
+        const testDoc = { name: 'Ren' };
+
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
+            const id = doc.insertedId;
+            const update = { name: 'New Name' };
+
+            return SubModel
+                .findByIdAndUpdateAsync(id, update)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
                 });
         });
     });
 
 
-    lab.test('it returns a single result via id', (done) => {
+    lab.test('it returns an error when casting fails during findByIdAndUpdate', () => {
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const id = results.setup[0]._id;
-
-            SubModel.findById(id, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
+        return SubModel
+            .findByIdAndUpdateAsync('NOTVALIDOBJECTID', {})
+            .catch((err) => {
+                Code.expect(err).to.exist();
             });
-        });
     });
 
 
-    lab.test('it returns and error when id casting fails during findById', (done) => {
+    lab.test('it updates a single document via id (with options)', () => {
 
-        SubModel.findById('NOTVALIDOBJECTID', (err, result) => {
+        const testDoc = { name: 'Ren' };
 
-            Code.expect(err).to.exist();
-            done();
-        });
-    });
-
-
-    lab.test('it updates a single document via findByIdAndUpdate', (done) => {
-
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const id = results.setup[0]._id;
-            const update = { name: 'New Name' };
-
-            SubModel.findByIdAndUpdate(id, update, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
-            });
-        });
-    });
-
-
-    lab.test('it returns an error when casting fails during findByIdAndUpdate', (done) => {
-
-        SubModel.findByIdAndUpdate('NOTVALIDOBJECTID', {}, (err, result) => {
-
-            Code.expect(err).to.exist();
-            done();
-        });
-    });
-
-
-    lab.test('it updates a single document via id (with options)', (done) => {
-
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const id = results.setup[0]._id;
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
+            const id = doc.insertedId;
             const update = { name: 'New Name' };
             const options = { returnOriginal: false };
 
-            SubModel.findByIdAndUpdate(id, update, options, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
-            });
+            return SubModel
+                .findByIdAndUpdateAsync(id, update, options)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
+                });
         });
     });
 
 
-    lab.test('it updates a single document via findOneAndUpdate', (done) => {
+    lab.test('it updates a single document via findOneAndUpdate', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
+        return SubModel
+            .insertOneAsync(testDoc)
+            .then((results) => {
+                const filter = { name: 'Ren' };
+                const update = { name: 'New Name' };
 
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const filter = { name: 'Ren' };
-            const update = { name: 'New Name' };
-
-            SubModel.findOneAndUpdate(filter, update, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
+                return SubModel
+                    .findOneAndUpdateAsync(filter, update)
+                    .then((result) => {
+                        Code.expect(err).to.not.exist();
+                        Code.expect(result).to.be.an.object();
+                        Code.expect(result.value).to.be.an.instanceOf(SubModel);
+                });
             });
-        });
     });
 
 
-    lab.test('it updates a single document via findOneAndUpdate (with options)', (done) => {
+    lab.test('it updates a single document via findOneAndUpdate (with options)', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
+        SubModel.insertOneAsync(testDoc).then((doc) => {
             const filter = { name: 'Ren' };
             const update = { name: 'New Name' };
             const options = { returnOriginal: true };
 
-            SubModel.findOneAndUpdate(filter, update, options, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
-            });
+            return SubModel
+                .findOneAndUpdateAsync(filter, update, options)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
+                });
         });
     });
 
-    lab.test('it replaces a single document via findOneAndReplaceAsync', (done) => {
+    lab.test('it replaces a single document via findOneAndReplaceAsync', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
+        return SubModel.insertOneAsync(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
 
@@ -967,300 +840,193 @@ lab.experiment('MongoModels Proxied Methods', () => {
                 .findOneAndReplaceAsync(filter, doc)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
-                    // Code.expect(result).to.be.an.instanceOf(SubModel);
-                })
-                .catch((err) => {
-                    Code.expect(err).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
                 });
         });
     });
 
 
-    lab.test('it replaces a single document via findOneAndReplace', (done) => {
+    lab.test('it replaces a single document via findOneAndReplace', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
+        return SubModel.insertOneAsync(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
 
-            SubModel.findOneAndReplace(filter, doc, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
-            });
+            return SubModel
+                .findOneAndReplaceAsync(filter, doc)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
+                });
         });
     });
 
 
-    lab.test('it replaces a single document via findOneAndReplace (with options)', (done) => {
+    lab.test('it replaces a single document via findOneAndReplace (with options)', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
+        return SubModel.insertOneAsync(testDoc).then((results) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
             const options = { returnOriginal: true };
 
-            SubModel.findOneAndReplace(filter, doc, options, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
+            SubModel
+                .findOneAndReplaceAsync(filter, doc, options)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.instanceOf(SubModel);
             });
         });
     });
 
-    lab.test('it replaces one document and returns the result Async', (done) => {
+    lab.test('it replaces one document and returns the result Async', () => {
+        const testDoc = { name: 'Ren' };
+        return SubModel
+            .insertOneAsync(testDoc)
+            .then((results) => {
+                const filter = { name: 'Ren' };
+                const doc = { isCool: true };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            const filter = { name: 'Ren' };
-            const doc = { isCool: true };
-
-            return SubModel.replaceOneAsync(filter, doc).then((result) => {
-
-                Code.expect(result).to.be.an.object();
-                Code.expect(result.modifiedCount).to.equal(1);
+                return SubModel.replaceOneAsync(filter, doc).then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.modifiedCount).to.equal(1);
+                });
             });
-        });
+
     });
 
-    lab.test('it replaces one document and returns the result', (done) => {
+    lab.test('it replaces one document and returns the result', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
+        return SubModel
+            .insertOneAsync(testDoc)
+            .then((results) => {
+                const filter = { name: 'Ren' };
+                const doc = { isCool: true };
 
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const filter = { name: 'Ren' };
-            const doc = { isCool: true };
-
-            SubModel.replaceOne(filter, doc, (err, count, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(count).to.be.a.number();
-                Code.expect(count).to.equal(1);
-                Code.expect(result).to.be.an.object();
-
-                done(err);
+                return SubModel
+                    .replaceOneAsync(filter, doc)
+                    .then((result) => {
+                        Code.expect(result.result).to.be.an.object();
+                        Code.expect(result.modifiedCount).to.equal(1);
+                        Code.expect(result).to.be.an.object();
+                });
             });
-        });
+
     });
 
 
-    lab.test('it replaces one document and returns the result (with options)', (done) => {
+    lab.test('it replaces one document and returns the result (with options)', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
+        return SubModel.insertOneAsync(testDoc).then((result) => {
             const filter = { name: 'Ren' };
             const doc = { isCool: true };
             const options = { upsert: true };
 
-            SubModel.replaceOne(filter, doc, options, (err, count, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(count).to.be.a.number();
-                Code.expect(count).to.equal(1);
-                Code.expect(result).to.be.an.object();
-
-                done(err);
+            return SubModel
+                .replaceOneAsync(filter, doc, options)
+                .then((result) => {
+                    Code.expect(result.result).to.be.an.object();
+                    Code.expect(result.modifiedCount).to.equal(1);
+                    Code.expect(result).to.be.an.object();
             });
         });
     });
 
 
-    lab.test('it returns an error when replaceOne fails', (done) => {
+    lab.test('it returns an error when replaceOne fails', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
+        return SubModel
+            .insertOneAsync(testDoc)
+            .then((results) => {
+                const realCollection = MongoModels.db.collection;
+                MongoModels.db.collection = function () {
+                    return {
+                        replaceOne: function (filter, doc, options) {
 
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const realCollection = MongoModels.db.collection;
-            MongoModels.db.collection = function () {
-
-                return {
-                    replaceOne: function (filter, doc, options, callback) {
-
-                        callback(new Error('Whoops!'));
-                    }
+                            return Promise.reject(new Error('Whoops!'));
+                        }
+                    };
                 };
-            };
 
-            const filter = { name: 'Ren' };
-            const doc = { isCool: true };
+                const filter = { name: 'Ren' };
+                const doc = { isCool: true };
 
-            SubModel.replaceOne(filter, doc, (err, count, result) => {
-
-                Code.expect(err).to.exist();
-                Code.expect(count).to.not.exist();
-                Code.expect(result).to.not.exist();
-
-                MongoModels.db.collection = realCollection;
-                done();
+                return SubModel
+                    .replaceOneAsync(filter, doc)
+                    .catch((err) => {
+                        Code.expect(err).to.exist();
+                        MongoModels.db.collection = realCollection;
+                });
             });
-        });
     });
 
 
-    lab.test('it deletes a document via findOneAndDelete', (done) => {
+    lab.test('it deletes a document via findOneAndDelete', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
             const filter = { name: 'Ren' };
 
-            SubModel.findOneAndDelete(filter, (err, result) => {
+            return SubModel
+                .findOneAndDeleteAsync(filter)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
+                });
+        });
 
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
+    });
 
-                done();
-            });
+
+    lab.test('it deletes a document via findByIdAndDelete', () => {
+        const testDoc = { name: 'Ren' };
+
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
+            const id = doc.insertedId;
+
+            return SubModel
+                .findByIdAndDeleteAsync(id)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
+                });
         });
     });
 
 
-    lab.test('it deletes a document via findByIdAndDelete', (done) => {
+    lab.test('it deletes a single document via findByIdAndDelete (with options)', () => {
 
-        Async.auto({
-            setup: function (cb) {
+        const testDoc = { name: 'Ren' };
 
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const id = results.setup[0]._id;
-
-            SubModel.findByIdAndDelete(id, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
-            });
-        });
-    });
-
-
-    lab.test('it deletes a single document via findByIdAndDelete (with options)', (done) => {
-
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const id = results.setup[0]._id;
+        return SubModel.insertOneAsync(testDoc).then((doc) => {
+            const id = doc.insertedId;
             const options = {
                 projection: {
                     name: 1
                 }
             };
 
-            SubModel.findByIdAndDelete(id, options, (err, result) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(result).to.be.an.object();
-                Code.expect(result).to.be.an.instanceOf(SubModel);
-
-                done();
+            return SubModel
+                .findByIdAndDeleteAsync(id, options)
+                .then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.value).to.be.an.object();
             });
         });
     });
 
 
-    lab.test('it returns an error when id casting fails during findByIdAndDelete', (done) => {
+    lab.test('it returns an error when id casting fails during findByIdAndDelete', () => {
 
-        SubModel.findByIdAndDelete('NOTVALIDOBJECTID', (err, result) => {
-
+        return SubModel.findByIdAndDeleteAsync('NOTVALIDOBJECTID').catch((err) => {
             Code.expect(err).to.exist();
-            done();
         });
     });
 
@@ -1268,92 +1034,53 @@ lab.experiment('MongoModels Proxied Methods', () => {
         const testDoc = { name: 'Ren' };
         return SubModel.insertOneAsync(testDoc).then((record) => {
             const _id = record.ops[0]._id;
-            return SubModel.deleteOneAsync({ _id })
+            return SubModel
+                .deleteOneAsync({ _id })
                 .then((result) => {
                     Code.expect(result.deletedCount).to.equal(1);
                 });
         });
-
-        // Async.auto({
-        //     setup: function (cb) {
-        //
-        //         SubModel.insertOne(testDoc, cb);
-        //     }
-        // }, (err, results) => {
-        //     const id = results.setup[0]._id.toString();
-        //
-        //     return
-        //         .catch((err) => {
-        //             Code.expect(err).to.not.exist();
-        //         });
-        // });
     });
 
-    lab.test('it deletes one document via deleteOne', (done) => {
+    lab.test('it deletes one document via deleteOne', () => {
+        const testDoc = { name: 'Ren' };
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDoc = { name: 'Ren' };
-
-                SubModel.insertOne(testDoc, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            SubModel.deleteOne({}, (err, count) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(count).to.be.a.number();
-                Code.expect(count).to.equal(1);
-
-                done();
+        return SubModel
+            .insertOneAsync(testDoc)
+            .then((doc) => {
+                return SubModel
+                    .deleteOneAsync({})
+                    .then((result) => {
+                        Code.expect(result).to.be.an.object();
+                        Code.expect(result.deletedCount).to.equal(1);
+                    });
             });
-        });
     });
 
 
-    lab.test('it returns an error when deleteOne fails', (done) => {
+    lab.test('it returns an error when deleteOne fails', () => {
+        const testDocs = [
+            { name: 'Ren' },
+            { name: 'Stimpy' }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren' },
-                    { name: 'Stimpy' }
-                ];
-
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const realCollection = MongoModels.db.collection;
-            MongoModels.db.collection = function () {
-
-                return {
-                    deleteOne: function (filter, callback) {
-
-                        callback(new Error('Whoops!'));
-                    }
+        return SubModel
+            .insertManyAsync(testDocs)
+            .then((result) => {
+                const realCollection = MongoModels.db.collection;
+                MongoModels.db.collection = function () {
+                    return {
+                        deleteOne: function (filter) {
+                            return Promise.reject(new Error('Whoops!'));
+                        }
+                    };
                 };
-            };
 
-            SubModel.deleteOne({}, (err, count) => {
-
-                Code.expect(err).to.exist();
-                Code.expect(count).to.not.exist();
-
-                MongoModels.db.collection = realCollection;
-                done();
+                return SubModel.deleteOneAsync({}).catch((err) => {
+                    Code.expect(err).to.exist();
+                    MongoModels.db.collection = realCollection;
+                });
             });
-        });
     });
 
     lab.test('it deletes multiple documents and returns the count via deleteMany Async', () => {
@@ -1364,79 +1091,54 @@ lab.experiment('MongoModels Proxied Methods', () => {
         ];
 
         return SubModel.insertManyAsync(testDocs).then((insertResult) => {
-            return SubModel.deleteManyAsync({}).then((result) => {
+            return SubModel.deleteMany({}).then((result) => {
                 Code.expect(result.deletedCount).to.equal(2);
             });
         });
     });
 
-    lab.test('it deletes multiple documents and returns the count via deleteMany', (done) => {
+    lab.test('it deletes multiple documents and returns the count via deleteMany', () => {
+        const testDocs = [
+            { name: 'Ren' },
+            { name: 'Stimpy' }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren' },
-                    { name: 'Stimpy' }
-                ];
-
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            SubModel.deleteMany({}, (err, count) => {
-
-                Code.expect(err).to.not.exist();
-                Code.expect(count).to.be.a.number();
-                Code.expect(count).to.equal(2);
-
-                done();
+        return SubModel
+            .insertManyAsync(testDocs)
+            .then((doc) => {
+                SubModel.deleteMany({}).then((result) => {
+                    Code.expect(result).to.be.an.object();
+                    Code.expect(result.deletedCount).to.equal(2);
+                });
             });
-        });
+
     });
 
 
-    lab.test('it returns an error when deleteMany fails', (done) => {
+    lab.test('it returns an error when deleteMany fails', () => {
+        const testDocs = [
+            { name: 'Ren' },
+            { name: 'Stimpy' }
+        ];
 
-        Async.auto({
-            setup: function (cb) {
-
-                const testDocs = [
-                    { name: 'Ren' },
-                    { name: 'Stimpy' }
-                ];
-
-                SubModel.insertMany(testDocs, cb);
-            }
-        }, (err, results) => {
-
-            if (err) {
-                return done(err);
-            }
-
-            const realCollection = MongoModels.db.collection;
-            MongoModels.db.collection = function () {
-
-                return {
-                    deleteMany: function (filter, callback) {
-
-                        callback(new Error('Whoops!'));
-                    }
+        return SubModel
+            .insertManyAsync(testDocs)
+            .then((result) => {
+                const realCollection = MongoModels.db.collection;
+                MongoModels.db.collection = function () {
+                    return {
+                        deleteMany: function (filter) {
+                            return Promise.reject(new Error('Whoops!'));
+                        }
+                    };
                 };
-            };
 
-            SubModel.deleteMany({}, (err, count) => {
-
-                Code.expect(err).to.exist();
-                Code.expect(count).to.not.exist();
-
-                MongoModels.db.collection = realCollection;
-                done();
+                SubModel
+                    .deleteMany({})
+                    .catch((err) => {
+                        Code.expect(err).to.exist();
+                        MongoModels.db.collection = realCollection;
+                });
             });
-        });
     });
 });

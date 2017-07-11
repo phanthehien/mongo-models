@@ -213,7 +213,6 @@ class MongoModels {
         return sorts;
     }
 
-
     static aggregate() {
 
         const args = new Array(arguments.length);
@@ -223,6 +222,18 @@ class MongoModels {
 
         const collection = MongoModels.db.collection(this.collection);
         collection.aggregate.apply(collection, args);
+    }
+
+    static aggregateAsync() {
+        return new Promise(function (resolve, reject) {
+            return MongoModels.aggregate(arguments, (err, results) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                return resolve(results);
+            })
+        });
     }
 
 
@@ -246,7 +257,7 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        collection.distinct.apply(collection, args);
+        return collection.distinct.apply(collection, args);
     }
 
 
@@ -264,8 +275,18 @@ class MongoModels {
         return collection.find.apply(collection, args).toArray();
     }
 
+    static findOneAsync() {
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
 
-    static findOne() {
+        const collection = MongoModels.db.collection(this.collection);
+
+        return collection.findOne.apply(collection, args);
+    }
+
+    static findOneAndUpdateAsync() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -273,10 +294,15 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        const callback = this.resultFactory.bind(this, args.pop());
+        const filter = args.shift();
+        const doc = args.shift();
+        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
 
-        args.push(callback);
-        return collection.findOne.apply(collection, args);
+        args.push(filter);
+        args.push(doc);
+        args.push(options);
+
+        return collection.findOneAndUpdate.apply(collection, args);
     }
 
 
@@ -301,6 +327,17 @@ class MongoModels {
         return collection.findOneAndUpdate.apply(collection, args);
     }
 
+    static findOneAndDeleteAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+
+        return collection.findOneAndDelete.apply(collection, args);
+    }
 
     static findOneAndDelete() {
 
@@ -365,7 +402,6 @@ class MongoModels {
 
         const collection = MongoModels.db.collection(this.collection);
         const id = args.shift();
-        // const callback = this.resultFactory.bind(this, args.pop());
         let filter;
 
         try {
@@ -376,7 +412,6 @@ class MongoModels {
         }
 
         args.unshift(filter);
-        // args.push(callback);
         return collection.findOne.apply(collection, args);
     }
 
@@ -405,6 +440,28 @@ class MongoModels {
         collection.findOne.apply(collection, args);
     }
 
+    static findByIdAndUpdateAsync() {
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const id = args.shift();
+        const update = args.shift();
+        const options = Hoek.applyToDefaults({ returnOriginal: false }, args.pop() || {});
+        let filter;
+
+        try {
+            filter = { _id: this._idClass(id) };
+        }
+        catch (exception) {
+            return Promise.reject(exception);
+        }
+
+        return collection.findOneAndUpdate(filter, update, options);
+    }
+
 
     static findByIdAndUpdate() {
 
@@ -428,6 +485,28 @@ class MongoModels {
         }
 
         collection.findOneAndUpdate(filter, update, options, callback);
+    }
+
+    static findByIdAndDeleteAsync() {
+
+        const args = new Array(arguments.length);
+        for (let i = 0; i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+
+        const collection = MongoModels.db.collection(this.collection);
+        const id = args.shift();
+        const options = Hoek.applyToDefaults({}, args.pop() || {});
+        let filter;
+
+        try {
+            filter = { _id: this._idClass(id) };
+        }
+        catch (exception) {
+            return Promise.reject(exception);
+        }
+
+        return collection.findOneAndDelete(filter, options);
     }
 
 
@@ -617,16 +696,6 @@ class MongoModels {
         }
 
         const collection = MongoModels.db.collection(this.collection);
-        // const callback = args.pop();
-
-        // args.push((err, results) => {
-        //
-        //     if (err) {
-        //         return callback(err);
-        //     }
-        //
-        //     callback(null, results.deletedCount);
-        // });
 
         return collection.deleteOne.apply(collection, args);
     }
@@ -658,28 +727,6 @@ class MongoModels {
         const collection = MongoModels.db.collection(this.collection);
         return collection.deleteMany.apply(collection, arguments);
     }
-
-    // static deleteMany() {
-    //
-    //     const args = new Array(arguments.length);
-    //     for (let i = 0; i < args.length; ++i) {
-    //         args[i] = arguments[i];
-    //     }
-    //
-    //     const collection = MongoModels.db.collection(this.collection);
-    //     const callback = args.pop();
-    //
-    //     args.push((err, results) => {
-    //
-    //         if (err) {
-    //             return callback(err);
-    //         }
-    //
-    //         callback(null, results.deletedCount);
-    //     });
-    //
-    //     collection.deleteMany.apply(collection, args);
-    // }
 }
 
 MongoModels._idClass = Mongodb.ObjectID;
