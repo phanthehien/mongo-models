@@ -727,7 +727,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
         return SubModel.insertOneAsync(testDoc).then((doc) => {
             const id = doc.insertedId;
 
-            return SubModel.findByIdAsync(id)
+            return SubModel.findById(id)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                 })
@@ -735,7 +735,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     });
 
     lab.test('it returns and error when id casting fails during findById', () => {
-        return SubModel.findByIdAsync('NOTVALIDOBJECTID').catch((err) => {
+        return SubModel.findById('NOTVALIDOBJECTID').catch((err) => {
             Code.expect(err).to.exist();
         });
     });
@@ -750,7 +750,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const update = { name: 'New Name' };
 
             return SubModel
-                .findByIdAndUpdateAsync(id, update)
+                .findByIdAndUpdate(id, update)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -762,7 +762,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
     lab.test('it returns an error when casting fails during findByIdAndUpdate', () => {
 
         return SubModel
-            .findByIdAndUpdateAsync('NOTVALIDOBJECTID', {})
+            .findByIdAndUpdate('NOTVALIDOBJECTID', {})
             .catch((err) => {
                 Code.expect(err).to.exist();
             });
@@ -779,7 +779,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const options = { returnOriginal: false };
 
             return SubModel
-                .findByIdAndUpdateAsync(id, update, options)
+                .findByIdAndUpdate(id, update, options)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -987,7 +987,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             const id = doc.insertedId;
 
             return SubModel
-                .findByIdAndDeleteAsync(id)
+                .findByIdAndDelete(id)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -1009,7 +1009,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
             };
 
             return SubModel
-                .findByIdAndDeleteAsync(id, options)
+                .findByIdAndDelete(id, options)
                 .then((result) => {
                     Code.expect(result).to.be.an.object();
                     Code.expect(result.value).to.be.an.object();
@@ -1020,7 +1020,7 @@ lab.experiment('MongoModels Proxied Methods', () => {
 
     lab.test('it returns an error when id casting fails during findByIdAndDelete', () => {
 
-        return SubModel.findByIdAndDeleteAsync('NOTVALIDOBJECTID').catch((err) => {
+        return SubModel.findByIdAndDelete('NOTVALIDOBJECTID').catch((err) => {
             Code.expect(err).to.exist();
         });
     });

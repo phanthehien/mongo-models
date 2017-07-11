@@ -341,7 +341,7 @@ class MongoModels {
         return collection.findOneAndReplace.apply(collection, args);
     }
 
-    static findByIdAsync() {
+    static findById() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
@@ -363,7 +363,7 @@ class MongoModels {
         return collection.findOne.apply(collection, args);
     }
 
-    static findByIdAndUpdateAsync() {
+    static findByIdAndUpdate() {
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
             args[i] = arguments[i];
@@ -385,7 +385,7 @@ class MongoModels {
         return collection.findOneAndUpdate(filter, update, options);
     }
 
-    static findByIdAndDeleteAsync() {
+    static findByIdAndDelete() {
 
         const args = new Array(arguments.length);
         for (let i = 0; i < args.length; ++i) {
