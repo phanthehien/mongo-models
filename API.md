@@ -8,6 +8,7 @@
 - [Methods](#methods)
   - [`connect(uri, options)`](#connectconfig)
   - [`aggregate(pipeline, [options])`](#aggregatepipeline-options)
+  - [`aggregateAsync(pipeline, [options])`](#aggregateasyncpipeline-options)
   - [`count(filter, [options])`](#countfilter-options)
   - [`createIndexes(indexSpecs)`](#createindexesindexspecs)
   - [`deleteMany(filter, [options])`](#deletemanyfilter-options)
@@ -55,10 +56,15 @@ const data = {
     name: 'Captain Cute'
 };
 
-Kitten.insert(data, (err, results) => {
+Kitten.insert(data)
+        .then((results) => {
 
-    // handle response
-});
+        // handle response
+        })
+        .catch((err) => {
+    
+        // handle error
+        });
 ```
 
 ### `collection`
@@ -104,6 +110,15 @@ Calculates aggregate values for the data in a collection where:
   [`aggregate`](https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/)
   method.
 
+### `aggregateAsync(pipeline, [options])`
+
+Calculates aggregate values for the data in a collection where:
+
+- `pipeline` - A sequence of data aggregation operations or stages.
+- `options` - an options object passed to MongoDB's native
+  [`aggregate`](https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/)
+  method.
+  
 ### `count(filter, [options])`
 
 Counts documents matching a `filter` where:
@@ -353,10 +368,15 @@ const data = {
     name: 'Captain Cute'
 };
 
-Kitten.validate(data, (err, value) => {
-
-    // handle results
-});
+Kitten.validate(data)
+      .then((results) => {
+      
+        // handle response
+        })
+        .catch((err) => {
+          
+        // handle error
+        });  
 ```
 
 See: https://github.com/hapijs/joi/blob/master/API.md#validatevalue-schema-options
