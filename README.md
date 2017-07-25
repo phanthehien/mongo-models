@@ -45,7 +45,7 @@ const Joi = require('joi');
 const MongoModels = require('mongo-models');
 
 class Customer extends MongoModels {
-    static create(name, email, phone, callback) {
+    static create(name, email, phone) {
 
       const document = {
           name,
@@ -53,7 +53,7 @@ class Customer extends MongoModels {
           phone
       };
 
-      this.insertOne(document, callback);
+      return this.insertOne(document);
     }
 
     speak() {
@@ -82,19 +82,21 @@ const MongoModels = require('mongo-models');
 
 const app = Express();
 
-MongoModels.connect(process.env.MONGODB_URI, {}, (err, db) => {
-
-    if (err) {
-        // TODO: throw error or try reconnecting
-        return;
-    }
-
-    // optionally, we can keep a reference to db if we want
-    // access to the db connection outside of our models
-    app.db = db;
-
-    console.log('Models are now connected to mongodb.');
-});
+MongoModels.connect(process.env.MONGODB_URI, {})
+           .then((db) => {
+                
+                // optionally, we can keep a reference to db if we want
+                // access to the db connection outside of our models
+                app.db = db;
+                console.log('Models are now connected to mongodb.');
+            })
+            .catch((err) => {
+                
+                if (err) {
+                    // TODO: throw error or try reconnecting
+                    return;
+                }
+            });
 
 app.post('/customers', (req, res) => {
 
@@ -102,15 +104,17 @@ app.post('/customers', (req, res) => {
     const email = req.body.email;
     const phone = req.body.phone;
 
-    Customer.create(name, email, phone, (err, customers) => {
+    Customer.create(name, email, phone)
+            .then((customers) => {
 
-        if (err) {
-            res.status(500).json({ error: 'something blew up' });
-            return;
-        }
-
-        res.json(customers[0]);
-    });
+                res.json(customers[0]);
+            })
+            .catch((err) => {
+        
+                if (err) {
+                    res.status(500).json({ error: 'something blew up' });
+                }
+            });
 });
 
 app.get('/customers', (req, res) => {
@@ -119,15 +123,18 @@ app.get('/customers', (req, res) => {
         name: req.query.name
     };
 
-    Customer.find(filter, (err, customers) => {
+    Customer.find(filter)
+        .then((customers) => {
 
-        if (err) {
-            res.status(500).json({ error: 'something blew up' });
-            return;
-        }
-
-        res.json(customers);
-    });
+        
+            res.json(customers);
+        })
+        .catch((err) => {
+        
+            if (err) {
+                res.status(500).json({ error: 'something blew up' });
+            }     
+        });
 });
 
 app.server.listen(process.env.PORT, () => {
