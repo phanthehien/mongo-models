@@ -100,7 +100,12 @@ Connects to a MongoDB server where:
 
 - `uri` - the connection string passed to `MongoClient.connect`.
 - `options` - an optional object passed to `MongoClient.connect`.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return the initialized db object (db) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
+  
 ### `aggregate(pipeline, [options])`
 
 Calculates aggregate values for the data in a collection where:
@@ -109,7 +114,11 @@ Calculates aggregate values for the data in a collection where:
 - `options` - an options object passed to MongoDB's native
   [`aggregate`](https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, an array of documents return from the aggregation (results) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `aggregateAsync(pipeline, [options])`
 
 Calculates aggregate values for the data in a collection where:
@@ -118,6 +127,10 @@ Calculates aggregate values for the data in a collection where:
 - `options` - an options object passed to MongoDB's native
   [`aggregate`](https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/)
   method.
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, an array of documents return from the aggregation (results) => { }.
+  - if the connection is failed, return an error object (error) => { }.  
   
 ### `count(filter, [options])`
 
@@ -127,7 +140,11 @@ Counts documents matching a `filter` where:
 - `options` - an options object passed to MongoDB's native
   [`count`](https://docs.mongodb.com/manual/reference/method/db.collection.count/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, a number indicating how many documents matched the filter (count) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `createIndexes(indexSpecs)`
 
 Note: `createIndexes` is called during plugin registration for each model when
@@ -146,7 +163,11 @@ Kitten.indexes = [
     { key: { email: -1 } }
 ];
 ```
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, if creating the indexes succeeded, the result object (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 For details on all the options an index specification may have see:
 
 https://docs.mongodb.org/manual/reference/command/createIndexes/
@@ -159,7 +180,11 @@ Deletes multiple documents and returns the count of deleted documents where:
 - `options` - an options object passed to MongoDB's native
   [`deleteMany`](https://docs.mongodb.com/manual/reference/method/db.collection.deleteMany/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a number indicating how many documents were deleted (count) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `deleteOne(filter, [options])`
 
 Deletes a document and returns the count of deleted documents where:
@@ -168,7 +193,11 @@ Deletes a document and returns the count of deleted documents where:
 - `options` - an options object passed to MongoDB's native
   [`deleteOne`](https://docs.mongodb.com/manual/reference/method/db.collection.deleteOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return  a number indicating how many documents were deleted (count) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `disconnect()`
 
 Closes the current db connection.
@@ -179,7 +208,11 @@ Finds the distinct values for the specified `field`.
 
 - `field` - a string representing the field for which to return distinct values.
 - `filter` - an optional filter object used to limit the documents distinct applies to.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return  an array of values representing the distinct values for the specified field (values) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `fieldsAdapter(fields)`
 
 A helper method to create a fields object suitable to use with MongoDB queries
@@ -195,7 +228,7 @@ Kitten.fieldsAdapter('name -email');
 
 // { name: true, email: false }
 ```
-
+  
 ### `find(filter, [options])`
 
 Finds documents where:
@@ -204,7 +237,11 @@ Finds documents where:
 - `options` - an options object passed to MongoDB's native
   [`find`](https://docs.mongodb.com/manual/reference/method/db.collection.find/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return an array of documents as class instances (results) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findById(id, [options])`
 
 Finds a document by `_id` where:
@@ -214,14 +251,22 @@ Finds a document by `_id` where:
 - `options` - an options object passed to MongoDB's native
   [`findOne`](https://docs.mongodb.com/manual/reference/method/db.collection.findOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findByIdAndDelete(id)`
 
 Finds a document by `_id`, deletes it and returns it where:
 
 - `id` - is a string value of the `_id` to find. It will be casted to the type
   of `_idClass`.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findByIdAndUpdate(id, update, [options])`
 
 Finds a document by `_id`, updates it and returns it where:
@@ -232,7 +277,11 @@ Finds a document by `_id`, updates it and returns it where:
 - `options` - an optional options object passed to MongoDB's native
   [`findOneAndUpdate`](https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/)
   method. Defaults to `{ returnOriginal: false }`.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findOne(filter, [options])`
 
 Finds one document matching a `filter` where:
@@ -241,7 +290,11 @@ Finds one document matching a `filter` where:
 - `options` - an options object passed to MongoDB's native
   [`findOne`](https://docs.mongodb.com/manual/reference/method/db.collection.findOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findOneAndDelete(filter, [options])`
 
 Finds one document matching a `filter`, deletes it and returns it where:
@@ -250,7 +303,11 @@ Finds one document matching a `filter`, deletes it and returns it where:
 - `options` - an options object passed to MongoDB's native
   [`findOneAndDelete`](https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndDelete/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `findOneAndUpdate(filter, update, [options])`
 
 Finds one document matching a `filter`, updates it and returns it where:
@@ -260,7 +317,11 @@ Finds one document matching a `filter`, updates it and returns it where:
 - `options` - an options object passed to MongoDB's native
   [`findOneAndUpdate`](https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/)
   method. Defaults to `{ returnOriginal: false }`.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a document as a class instance (result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `insertMany(docs, [options])`
 
 Inserts multiple documents and returns them where:
@@ -269,7 +330,11 @@ Inserts multiple documents and returns them where:
 - `options` - an options object passed to MongoDB's native
   [`insertMany`](https://docs.mongodb.com/manual/reference/method/db.collection.insertMany/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return an array of documents as a class instances (results) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `insertOne(doc, [options])`
 
 Inserts a document and returns the new document where:
@@ -278,7 +343,11 @@ Inserts a document and returns the new document where:
 - `options` - an options object passed to MongoDB's native
   [`insertOne`](https://docs.mongodb.com/manual/reference/method/db.collection.insertOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return an array of documents as a class instances (results) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `pagedFind(filter, fields, sort, limit, page)`
 
 Finds documents with paginated results where:
@@ -291,7 +360,25 @@ Finds documents with paginated results where:
   order.
 - `limit` - a number indicating how many results should be returned.
 - `page` - a number indicating the current page.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return the results object (result) => { }.
+    Where result: 
+        + data - an array of documents from the query as class instances.
+        + pages - an object where:
+        + current - a number indicating the current page.
+        + prev - a number indicating the previous page.
+        + hasPrev - a boolean indicating if there is a previous page.
+        + next - a number indicating the next page.
+        + hasNext - a boolean indicating if there is a next page.
+        + total - a number indicating the total number of pages.
+        + items - an object where:
+        + limit - a number indicating the how many results should be returned.
+        + begin - a number indicating what item number the results begin with.
+        + end - a number indicating what item number the results end with.
+        + total - a number indicating the total number of matching results.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `replaceOne(filter, doc, [options])`
 
 Replaces a document and returns the count of modified documents where:
@@ -301,7 +388,12 @@ Replaces a document and returns the count of modified documents where:
 - `options` - an options object passed to MongoDB's native
   [`replaceOne`](https://docs.mongodb.com/manual/reference/method/db.collection.replaceOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a number indicating how many documents were modified 
+    and the raw result document returned by MongoDB's native driver (count, result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `sortAdapter(sorts)`
 
 A helper method to create a sort object suitable to use with MongoDB queries
@@ -317,7 +409,7 @@ Kitten.sortAdapter('name -email');
 
 // { name: 1, email: -1 }
 ```
-
+  
 ### `updateMany(filter, update, [options])`
 
 Updates multiple documents and returns the count of modified documents where:
@@ -327,7 +419,12 @@ Updates multiple documents and returns the count of modified documents where:
 - `options` - an options object passed to MongoDB's native
   [`updateMany`](https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a number indicating how many documents were modified 
+      and the raw result document returned by MongoDB's native driver (count, result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `updateOne(filter, update, [options])`
 
 Updates a document and returns the count of modified documents where:
@@ -337,7 +434,12 @@ Updates a document and returns the count of modified documents where:
 - `options` - an options object passed to MongoDB's native
   [`updateOne`](https://docs.mongodb.com/manual/reference/method/db.collection.updateOne/)
   method.
-
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return a number indicating how many documents were modified 
+      and the raw result document returned by MongoDB's native driver (count, result) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `validate()`
 
 Uses `joi` validation using the static `schema` object property of a model
@@ -356,6 +458,11 @@ cc.validate((err, value) => {
 
 See: https://github.com/hapijs/joi/blob/master/API.md#validatevalue-schema-options
 
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return the validated value with any type conversions and other modifiers applied (value) => { }.
+  - if the connection is failed, return an error object (error) => { }.
+  
 ### `validate(input)`
 
 Uses `joi` validation using the static `schema` object property of a model
@@ -380,3 +487,8 @@ Kitten.validate(data)
 ```
 
 See: https://github.com/hapijs/joi/blob/master/API.md#validatevalue-schema-options
+
+- Returns a 'promise' as a result
+  where:
+  - if the connection is success, return the validated value with any type conversions and other modifiers applied (value) => { }.
+  - if the connection is failed, return an error object (error) => { }.
