@@ -9,7 +9,7 @@
   - [`connect(uri, options)`](#connectconfig)
   - [`aggregate(pipeline, [options])`](#aggregatepipeline-options)
   - [`count(filter, [options])`](#countfilter-options)
-  - [`createIndexes(indexSpecs, [callback])`](#createindexesindexspecs)
+  - [`createIndexes(indexSpecs)`](#createindexesindexspecs)
   - [`deleteMany(filter, [options])`](#deletemanyfilter-options)
   - [`deleteOne(filter, [options])`](#deleteonefilter-options)
   - [`disconnect()`](#disconnect)
@@ -113,7 +113,7 @@ Counts documents matching a `filter` where:
   [`count`](https://docs.mongodb.com/manual/reference/method/db.collection.count/)
   method.
 
-### `createIndexes(indexSpecs, [callback])`
+### `createIndexes(indexSpecs)`
 
 Note: `createIndexes` is called during plugin registration for each model when
 the `autoIndex` option is set to `true`.
