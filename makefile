@@ -16,5 +16,5 @@ unit-test:
 	sleep 30; \
 	npm run test; \
 	RESULT="$$?" && echo "Test Result is: $$RESULT"; \
-	docker-compose -p mongo-models down; \
+	docker-compose -f docker-compose.test.yml down; \
 	exit $$RESULT;
